@@ -1,0 +1,75 @@
+#!/bin/bash
+
+while true; do
+  echo "What would you like to do?"
+  echo "1) Install Node.js"
+  echo "2) Install Nginx"
+  echo "3) Install Yarn for Node.js"
+  echo "4) Create a test directory with Yarn v2, dotenv and postgreSQL dependencies"
+  echo "5) Install Yarn Packages"
+  echo "6) Exit"
+  echo "Enter an option: "
+  read option
+
+  if [ $option == "1" ]; then
+    echo "Enter the version of Node.js you would like to install (e.g. 14): "
+    read node_version
+
+    if [[ $node_version =~ ^[0-9]+$ ]]; then
+      # Download the specified version of Node
+      curl -fsSL https://deb.nodesource.com/setup_$node_version.x | sudo -E bash - &&\
+      sudo apt-get install -y nodejs
+      echo "Node.js version $node_version has been installed."
+    else
+      echo "Invalid input. Please enter a valid version number."
+    fi
+
+  elif [ $option == "2" ]; then
+    if command -v nginx &>/dev/null; then
+        echo "Nginx is already installed"
+    else
+        # Install Nginx
+        sudo apt-get update
+        sudo apt-get install nginx
+        echo "Nginx has been installed."
+    fi
+  elif [ $option == "3" ]; then
+    if command -v yarn &>/dev/null; then
+        echo "Yarn is already installed"
+    else
+        # Install and configure Yarn
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+        sudo apt-get update && sudo apt-get install yarn
+        echo "Yarn has been installed."
+    fi
+  elif [ $option == "4" ]; then
+    echo "Enter the name of the directory you would like to create: "
+    read dir_name
+    if [[ ! -z "$dir_name" ]]; then
+        mkdir -p $dir_name
+        cd $dir_name
+        touch redflag
+        yarn init -2
+        yarn add dotenv pg
+        echo "Directory $dir_name created with Yarn version 2 and added dotenv and pg as dependencies"
+
+    else
+        echo "Invalid input. Please enter a valid directory name."
+    fi
+  elif [ $option == "5" ]; then
+     echo "Enter the name of the directory you would like to add packages to: "
+     read dir_name_yarninstall
+        if [[ ! -z "$dir_name_yarninstall" ]]; then
+            cd $dir_name_yarninstall
+            read -p "Enter a list of yarn packages names separated by space: " packages
+            yarn add $packages
+        else
+            echo "Invalid input. Please enter a valid directory name."
+        fi
+  elif [ $option == "6" ]; then
+    exit
+  else
+    echo "Invalid option selected."
+  fi
+done
