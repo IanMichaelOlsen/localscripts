@@ -1,0 +1,37 @@
+===Quickly Check IP counts for various sshd auth.log attempts.===
+==Monitor Failed Login Attempts==
+
+sudo awk '/Failed password/ {print $1, $2, $3, $9, $11}' /var/log/auth.log
+==List All Unique Users Who Attempted to Log In==
+
+sudo awk '/Accepted|Failed password/ {print $9}' /var/log/auth.log | sort | uniq
+==Count the Number of Login Attempts by Each User==
+
+sudo awk '/Accepted|Failed password/ {print $9}' /var/log/auth.log | sort | uniq -c | sort -nr
+==Check for IPs with Multiple Failed Attempts==
+
+sudo awk '/Failed password/ {print $(NF-3)}' /var/log/auth.log | sort | uniq -c | sort -nr | head
+==Extract All Accepted Logins==
+
+sudo awk '/Accepted/ {print $1, $2, $3, $9, $(NF-3)}' /var/log/auth.log
+==Identify Unsuccessful SSH Key Login Attempts==
+
+sudo awk '/Failed publickey/ {print $1, $2, $3, $9, $(NF-3)}' /var/log/auth.log
+==Find Accounts that Attempted to Log In but Don’t Exist==
+
+sudo awk '/Failed password for invalid user/ {print $8}' /var/log/auth.log | sort | uniq -c | sort -nr
+==Monitor Sudden Spikes in Login Attempts==
+
+sudo awk '/Failed password/ {print $1, $2}' /var/log/auth.log | sort | uniq -c
+==Check for Commands Executed with sudo==
+
+sudo awk '/sudo/ {print $1, $2, $3, $6, $7, $8, $9}' /var/log/auth.log
+==Track Changes to SSH Configurations==
+
+sudo awk '/sshd.*reloaded/ {print $1, $2, $3, $0}' /var/log/syslog
+==Find High CPU/Memory Usage Warnings==
+
+sudo awk '/Out of memory|oom-killer|high cpu usage/ {print $1, $2, $3, $0}' /var/log/syslog
+==Identify Boot and Shutdown Times==
+
+sudo awk '/reboot|shutdown/ {print $1, $2, $3, $0}' /var/log/syslog
